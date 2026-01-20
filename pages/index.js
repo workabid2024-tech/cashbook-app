@@ -19,7 +19,6 @@ export default function CashbookApp() {
     date: new Date().toISOString().split('T')[0]
   });
 
-  // Load data from persistent storage
   useEffect(() => {
     loadData();
   }, []);
@@ -41,7 +40,7 @@ export default function CashbookApp() {
         setTransactions(JSON.parse(transactionsData.value));
       }
     } catch (error) {
-      console.log('No previous data found, starting fresh');
+      console.log('Starting fresh');
     }
   };
 
@@ -50,7 +49,7 @@ export default function CashbookApp() {
       await window.storage.set('cashbook-accounts', JSON.stringify(newAccounts || accounts));
       await window.storage.set('cashbook-transactions', JSON.stringify(newTransactions || transactions));
     } catch (error) {
-      console.error('Error saving data:', error);
+      console.error('Error saving:', error);
     }
   };
 
@@ -105,7 +104,7 @@ export default function CashbookApp() {
     const updatedTransactions = transactions.map(t => 
       t.id === editingTransaction.id 
         ? { ...t, ...transactionForm, amount: parseFloat(transactionForm.amount) }
-        : Tr
+        : t
     );
     
     setTransactions(updatedTransactions);
@@ -183,72 +182,181 @@ export default function CashbookApp() {
     a.click();
   };
 
+  const styles = {
+    container: {
+      minHeight: '100vh',
+      background: 'linear-gradient(to bottom right, #EBF4FF, #E0E7FF)',
+      fontFamily: 'system-ui, -apple-system, sans-serif'
+    },
+    header: {
+      background: 'linear-gradient(to right, #2563EB, #4F46E5)',
+      color: 'white',
+      padding: '24px',
+      boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'
+    },
+    title: {
+      fontSize: '30px',
+      fontWeight: 'bold',
+      marginBottom: '16px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px'
+    },
+    accountBtn: {
+      padding: '8px 16px',
+      borderRadius: '8px',
+      border: 'none',
+      cursor: 'pointer',
+      fontWeight: '600',
+      transition: 'all 0.2s',
+      marginRight: '8px',
+      marginBottom: '8px'
+    },
+    activeAccount: {
+      background: 'white',
+      color: '#2563EB'
+    },
+    inactiveAccount: {
+      background: '#3B82F6',
+      color: 'white'
+    },
+    addAccountBtn: {
+      background: '#10B981',
+      color: 'white'
+    },
+    card: {
+      background: 'white',
+      borderRadius: '12px',
+      boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+      padding: '24px'
+    },
+    balanceCard: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between'
+    },
+    input: {
+      width: '100%',
+      padding: '8px 12px',
+      border: '1px solid #D1D5DB',
+      borderRadius: '8px',
+      fontSize: '14px',
+      outline: 'none'
+    },
+    button: {
+      padding: '8px 16px',
+      borderRadius: '8px',
+      border: 'none',
+      cursor: 'pointer',
+      fontWeight: '600',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      transition: 'all 0.2s'
+    },
+    primaryBtn: {
+      background: '#2563EB',
+      color: 'white'
+    },
+    successBtn: {
+      background: '#10B981',
+      color: 'white'
+    },
+    modal: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0,0,0,0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '16px',
+      zIndex: 50
+    },
+    modalContent: {
+      background: 'white',
+      borderRadius: '12px',
+      boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
+      maxWidth: '500px',
+      width: '100%',
+      padding: '24px'
+    },
+    transaction: {
+      padding: '16px',
+      borderBottom: '1px solid #E5E7EB',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      transition: 'background 0.2s'
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div style={styles.container}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 shadow-lg">
-        <h1 className="text-3xl font-bold mb-4 flex items-center gap-2">
-          <DollarSign className="w-8 h-8" />
+      <div style={styles.header}>
+        <h1 style={styles.title}>
+          <DollarSign size={32} />
           Cashbook - হিসাব খাতা
         </h1>
         
-        {/* Account Selector */}
-        <div className="flex gap-2 flex-wrap">
+        <div style={{display: 'flex', flexWrap: 'wrap', gap: '8px'}}>
           {accounts.map(acc => (
             <button
               key={acc.id}
               onClick={() => setCurrentAccount(acc.id)}
-              className={`px-4 py-2 rounded-lg transition ${
-                currentAccount === acc.id
-                  ? 'bg-white text-blue-600 font-semibold'
-                  : 'bg-blue-500 hover:bg-blue-400'
-              }`}
+              style={{
+                ...styles.accountBtn,
+                ...(currentAccount === acc.id ? styles.activeAccount : styles.inactiveAccount)
+              }}
             >
               {acc.name}
             </button>
           ))}
           <button
             onClick={() => setShowAddAccount(true)}
-            className="px-4 py-2 rounded-lg bg-green-500 hover:bg-green-400 transition flex items-center gap-2"
+            style={{...styles.accountBtn, ...styles.addAccountBtn}}
           >
-            <Plus className="w-4 h-4" /> নতুন একাউন্ট
+            <Plus size={16} style={{display: 'inline', marginRight: '4px'}} /> নতুন একাউন্ট
           </button>
         </div>
       </div>
 
       {/* Balance Cards */}
       {currentAccount && (
-        <div className="max-w-6xl mx-auto px-4 -mt-8 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex items-center justify-between">
+        <div style={{maxWidth: '1200px', margin: '0 auto', padding: '0 16px', marginTop: '-32px', marginBottom: '24px'}}>
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px'}}>
+            <div style={styles.card}>
+              <div style={styles.balanceCard}>
                 <div>
-                  <p className="text-gray-600 text-sm">মোট ব্যালেন্স</p>
-                  <p className={`text-3xl font-bold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <p style={{color: '#6B7280', fontSize: '14px', marginBottom: '8px'}}>মোট ব্যালেন্স</p>
+                  <p style={{fontSize: '30px', fontWeight: 'bold', color: balance >= 0 ? '#10B981' : '#EF4444'}}>
                     ৳{balance.toFixed(2)}
                   </p>
                 </div>
-                <DollarSign className="w-12 h-12 text-blue-500" />
+                <DollarSign size={48} color="#3B82F6" />
               </div>
             </div>
             
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex items-center justify-between">
+            <div style={styles.card}>
+              <div style={styles.balanceCard}>
                 <div>
-                  <p className="text-gray-600 text-sm">মোট আয়</p>
-                  <p className="text-3xl font-bold text-green-600">৳{totalIncome.toFixed(2)}</p>
+                  <p style={{color: '#6B7280', fontSize: '14px', marginBottom: '8px'}}>মোট আয়</p>
+                  <p style={{fontSize: '30px', fontWeight: 'bold', color: '#10B981'}}>৳{totalIncome.toFixed(2)}</p>
                 </div>
-                <TrendingUp className="w-12 h-12 text-green-500" />
+                <TrendingUp size={48} color="#10B981" />
               </div>
             </div>
             
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex items-center justify-between">
+            <div style={styles.card}>
+              <div style={styles.balanceCard}>
                 <div>
-                  <p className="text-gray-600 text-sm">মোট খরচ</p>
-                  <p className="text-3xl font-bold text-red-600">৳{totalExpense.toFixed(2)}</p>
+                  <p style={{color: '#6B7280', fontSize: '14px', marginBottom: '8px'}}>মোট খরচ</p>
+                  <p style={{fontSize: '30px', fontWeight: 'bold', color: '#EF4444'}}>৳{totalExpense.toFixed(2)}</p>
                 </div>
-                <TrendingDown className="w-12 h-12 text-red-500" />
+                <TrendingDown size={48} color="#EF4444" />
               </div>
             </div>
           </div>
@@ -256,117 +364,105 @@ export default function CashbookApp() {
       )}
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 pb-8">
+      <div style={{maxWidth: '1200px', margin: '0 auto', padding: '0 16px 32px'}}>
         {!currentAccount ? (
-          <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-            <DollarSign className="w-24 h-24 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-700 mb-2">শুরু করুন</h2>
-            <p className="text-gray-600 mb-6">প্রথমে একটি একাউন্ট তৈরি করুন</p>
+          <div style={{...styles.card, textAlign: 'center', padding: '48px'}}>
+            <DollarSign size={96} color="#D1D5DB" style={{margin: '0 auto 16px'}} />
+            <h2 style={{fontSize: '24px', fontWeight: 'bold', color: '#374151', marginBottom: '8px'}}>শুরু করুন</h2>
+            <p style={{color: '#6B7280', marginBottom: '24px'}}>প্রথমে একটি একাউন্ট তৈরি করুন</p>
             <button
               onClick={() => setShowAddAccount(true)}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              style={{...styles.button, ...styles.primaryBtn, margin: '0 auto'}}
             >
               নতুন একাউন্ট যোগ করুন
             </button>
           </div>
         ) : (
           <>
-            {/* Search and Filter */}
-            <div className="bg-white rounded-xl shadow-lg p-4 mb-6">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
+            {/* Search and Actions */}
+            <div style={{...styles.card, marginBottom: '24px'}}>
+              <div style={{display: 'flex', flexWrap: 'wrap', gap: '16px'}}>
+                <div style={{flex: 1, minWidth: '200px', position: 'relative'}}>
+                  <Search size={20} style={{position: 'absolute', left: '12px', top: '10px', color: '#9CA3AF'}} />
                   <input
                     type="text"
                     placeholder="নোট দিয়ে খুঁজুন..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    style={{...styles.input, paddingLeft: '40px'}}
                   />
                 </div>
                 
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  style={styles.input}
                 >
                   <option value="all">সব দেখান</option>
                   <option value="income">শুধু আয়</option>
                   <option value="expense">শুধু খরচ</option>
                 </select>
                 
-                <button
-                  onClick={downloadReport}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4" /> রিপোর্ট ডাউনলোড
+                <button onClick={downloadReport} style={{...styles.button, ...styles.successBtn}}>
+                  <Download size={16} /> রিপোর্ট
                 </button>
                 
-                <button
-                  onClick={() => setShowAddTransaction(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" /> নতুন লেনদেন
+                <button onClick={() => setShowAddTransaction(true)} style={{...styles.button, ...styles.primaryBtn}}>
+                  <Plus size={16} /> নতুন লেনদেন
                 </button>
               </div>
             </div>
 
-            {/* Transactions List */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            {/* Transactions */}
+            <div style={styles.card}>
               {filteredTransactions.length === 0 ? (
-                <div className="p-12 text-center">
-                  <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-600">কোনো লেনদেন নেই</p>
+                <div style={{textAlign: 'center', padding: '48px'}}>
+                  <FileText size={64} color="#D1D5DB" style={{margin: '0 auto 16px'}} />
+                  <p style={{color: '#6B7280'}}>কোনো লেনদেন নেই</p>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-200">
-                  {filteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date)).map(transaction => (
-                    <div key={transaction.id} className="p-4 hover:bg-gray-50 transition">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 flex-1">
-                          <div className={`p-3 rounded-full ${
-                            transaction.type === 'income' ? 'bg-green-100' : 'bg-red-100'
-                          }`}>
-                            {transaction.type === 'income' ? (
-                              <TrendingUp className="w-6 h-6 text-green-600" />
-                            ) : (
-                              <TrendingDown className="w-6 h-6 text-red-600" />
-                            )}
-                          </div>
-                          
-                          <div className="flex-1">
-                            <p className="font-semibold text-gray-800">{transaction.note || 'নোট নেই'}</p>
-                            <p className="text-sm text-gray-600 flex items-center gap-2">
-                              <Calendar className="w-4 h-4" />
-                              {new Date(transaction.date).toLocaleDateString('bn-BD')}
-                            </p>
-                          </div>
-                          
-                          <p className={`text-xl font-bold ${
-                            transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                            {transaction.type === 'income' ? '+' : '-'}৳{transaction.amount.toFixed(2)}
-                          </p>
-                        </div>
-                        
-                        <div className="flex gap-2 ml-4">
-                          <button
-                            onClick={() => startEdit(transaction)}
-                            className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition"
-                          >
-                            <Edit2 className="w-5 h-5" />
-                          </button>
-                          <button
-                            onClick={() => deleteTransaction(transaction.id)}
-                            className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
-                        </div>
+                filteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date)).map(t => (
+                  <div key={t.id} style={styles.transaction}>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '16px', flex: 1}}>
+                      <div style={{
+                        padding: '12px',
+                        borderRadius: '50%',
+                        background: t.type === 'income' ? '#D1FAE5' : '#FEE2E2'
+                      }}>
+                        {t.type === 'income' ? (
+                          <TrendingUp size={24} color="#10B981" />
+                        ) : (
+                          <TrendingDown size={24} color="#EF4444" />
+                        )}
                       </div>
+                      
+                      <div style={{flex: 1}}>
+                        <p style={{fontWeight: '600', color: '#1F2937'}}>{t.note || 'নোট নেই'}</p>
+                        <p style={{fontSize: '14px', color: '#6B7280', display: 'flex', alignItems: 'center', gap: '8px'}}>
+                          <Calendar size={16} />
+                          {new Date(t.date).toLocaleDateString('bn-BD')}
+                        </p>
+                      </div>
+                      
+                      <p style={{
+                        fontSize: '20px',
+                        fontWeight: 'bold',
+                        color: t.type === 'income' ? '#10B981' : '#EF4444'
+                      }}>
+                        {t.type === 'income' ? '+' : '-'}৳{t.amount.toFixed(2)}
+                      </p>
                     </div>
-                  ))}
-                </div>
+                    
+                    <div style={{display: 'flex', gap: '8px', marginLeft: '16px'}}>
+                      <button onClick={() => startEdit(t)} style={{padding: '8px', border: 'none', background: '#DBEAFE', borderRadius: '8px', cursor: 'pointer'}}>
+                        <Edit2 size={20} color="#2563EB" />
+                      </button>
+                      <button onClick={() => deleteTransaction(t.id)} style={{padding: '8px', border: 'none', background: '#FEE2E2', borderRadius: '8px', cursor: 'pointer'}}>
+                        <Trash2 size={20} color="#EF4444" />
+                      </button>
+                    </div>
+                  </div>
+                ))
               )}
             </div>
           </>
@@ -375,146 +471,131 @@ export default function CashbookApp() {
 
       {/* Add Account Modal */}
       {showAddAccount && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-gray-800">নতুন একাউন্ট</h3>
-              <button onClick={() => setShowAddAccount(false)} className="text-gray-500 hover:text-gray-700">
-                <X className="w-6 h-6" />
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
+              <h3 style={{fontSize: '24px', fontWeight: 'bold'}}>নতুন একাউন্ট</h3>
+              <button onClick={() => setShowAddAccount(false)} style={{border: 'none', background: 'none', cursor: 'pointer'}}>
+                <X size={24} color="#6B7280" />
               </button>
             </div>
             
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">একাউন্টের নাম</label>
-                <input
-                  type="text"
-                  value={accountForm.name}
-                  onChange={(e) => setAccountForm({...accountForm, name: e.target.value})}
-                  placeholder="যেমন: ব্যক্তিগত, ব্যবসা"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">ধরন</label>
-                <select
-                  value={accountForm.type}
-                  onChange={(e) => setAccountForm({...accountForm, type: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="personal">ব্যক্তিগত</option>
-                  <option value="business">ব্যবসা</option>
-                </select>
-              </div>
-              
-              <button
-                onClick={addAccount}
-                className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold"
-              >
-                একাউন্ট যোগ করুন
-              </button>
+            <div style={{marginBottom: '16px'}}>
+              <label style={{display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px'}}>একাউন্টের নাম</label>
+              <input
+                type="text"
+                value={accountForm.name}
+                onChange={(e) => setAccountForm({...accountForm, name: e.target.value})}
+                placeholder="যেমন: ব্যক্তিগত"
+                style={styles.input}
+              />
             </div>
+            
+            <div style={{marginBottom: '16px'}}>
+              <label style={{display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px'}}>ধরন</label>
+              <select
+                value={accountForm.type}
+                onChange={(e) => setAccountForm({...accountForm, type: e.target.value})}
+                style={styles.input}
+              >
+                <option value="personal">ব্যক্তিগত</option>
+                <option value="business">ব্যবসা</option>
+              </select>
+            </div>
+            
+            <button onClick={addAccount} style={{...styles.button, ...styles.primaryBtn, width: '100%', justifyContent: 'center', padding: '12px'}}>
+              একাউন্ট যোগ করুন
+            </button>
           </div>
         </div>
       )}
 
       {/* Add/Edit Transaction Modal */}
       {showAddTransaction && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-gray-800">
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
+              <h3 style={{fontSize: '24px', fontWeight: 'bold'}}>
                 {editingTransaction ? 'লেনদেন সম্পাদনা' : 'নতুন লেনদেন'}
               </h3>
-              <button 
-                onClick={() => {
-                  setShowAddTransaction(false);
-                  cancelEdit();
-                }} 
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="w-6 h-6" />
+              <button onClick={() => { setShowAddTransaction(false); cancelEdit(); }} style={{border: 'none', background: 'none', cursor: 'pointer'}}>
+                <X size={24} color="#6B7280" />
               </button>
             </div>
             
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">ধরন</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => setTransactionForm({...transactionForm, type: 'income'})}
-                    className={`px-4 py-3 rounded-lg font-semibold transition ${
-                      transactionForm.type === 'income'
-                        ? 'bg-green-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    আয়
-                  </button>
-                  <button
-                    onClick={() => setTransactionForm({...transactionForm, type: 'expense'})}
-                    className={`px-4 py-3 rounded-lg font-semibold transition ${
-                      transactionForm.type === 'expense'
-                        ? 'bg-red-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    খরচ
-                  </button>
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">টাকার পরিমাণ</label>
-                <input
-                  type="number"
-                  value={transactionForm.amount}
-                  onChange={(e) => setTransactionForm({...transactionForm, amount: e.target.value})}
-                  placeholder="0.00"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">নোট</label>
-                <input
-                  type="text"
-                  value={transactionForm.note}
-                  onChange={(e) => setTransactionForm({...transactionForm, note: e.target.value})}
-                  placeholder="যেমন: বাজার খরচ"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">তারিখ</label>
-                <input
-                  type="date"
-                  value={transactionForm.date}
-                  onChange={(e) => setTransactionForm({...transactionForm, date: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              
-              <div className="flex gap-2">
-                {editingTransaction && (
-                  <button
-                    onClick={cancelEdit}
-                    className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-semibold"
-                  >
-                    বাতিল
-                  </button>
-                )}
+            <div style={{marginBottom: '16px'}}>
+              <label style={{display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px'}}>ধরন</label>
+              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px'}}>
                 <button
-                  onClick={editingTransaction ? updateTransaction : addTransaction}
-                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold flex items-center justify-center gap-2"
+                  onClick={() => setTransactionForm({...transactionForm, type: 'income'})}
+                  style={{
+                    padding: '12px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    background: transactionForm.type === 'income' ? '#10B981' : '#E5E7EB',
+                    color: transactionForm.type === 'income' ? 'white' : '#374151'
+                  }}
                 >
-                  <Check className="w-5 h-5" />
-                  {editingTransaction ? 'আপডেট করুন' : 'যোগ করুন'}
+                  আয়
+                </button>
+                <button
+                  onClick={() => setTransactionForm({...transactionForm, type: 'expense'})}
+                  style={{
+                    padding: '12px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    background: transactionForm.type === 'expense' ? '#EF4444' : '#E5E7EB',
+                    color: transactionForm.type === 'expense' ? 'white' : '#374151'
+                  }}
+                >
+                  খরচ
                 </button>
               </div>
             </div>
+            
+            <div style={{marginBottom: '16px'}}>
+              <label style={{display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px'}}>টাকার পরিমাণ</label>
+              <input
+                type="number"
+                value={transactionForm.amount}
+                onChange={(e) => setTransactionForm({...transactionForm, amount: e.target.value})}
+                placeholder="0.00"
+                style={styles.input}
+              />
+            </div>
+            
+            <div style={{marginBottom: '16px'}}>
+              <label style={{display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px'}}>নোট</label>
+              <input
+                type="text"
+                value={transactionForm.note}
+                onChange={(e) => setTransactionForm({...transactionForm, note: e.target.value})}
+                placeholder="যেমন: বাজার খরচ"
+                style={styles.input}
+              />
+            </div>
+            
+            <div style={{marginBottom: '16px'}}>
+              <label style={{display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px'}}>তারিখ</label>
+              <input
+                type="date"
+                value={transactionForm.date}
+                onChange={(e) => setTransactionForm({...transactionForm, date: e.target.value})}
+                style={styles.input}
+              />
+            </div>
+            
+            <button
+              onClick={editingTransaction ? updateTransaction : addTransaction}
+              style={{...styles.button, ...styles.primaryBtn, width: '100%', justifyContent: 'center', padding: '12px'}}
+            >
+              <Check size={20} />
+              {editingTransaction ? 'আপডেট করুন' : 'যোগ করুন'}
+            </button>
           </div>
         </div>
       )}
